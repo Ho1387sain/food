@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="manifest" href="manifest.json">
+
+    
+    <link rel="stylesheet" href="style.css?v=1.1">
+</head>
+<body>
+    <div id="ui-top-bar"> <!-- Wrapper for top UI elements -->
+        <div id="score-display-area">
+             Score: <span id="score">0</span> <!-- Reusing existing span -->
+        </div>
+        <div id="high-score-display-area">
+             Best: <span id="best-score">0</span>
+        </div>
+        <img src="assets/BtnPause.png" id="pause-button" alt="Pause">
+        <div id="next-fruit-area">
+            Next: <span id="next-fruit-emoji">❓</span> <!-- Reusing existing span -->
+        </div>
+    </div>
+
+    <!-- This might be visually redundant now -->
+    <!-- Ability Usage Tutorial Popup -->
+    
+    <div id="game-container">
+        <!-- The game will be rendered here by Matter.js -->
+        <div id="ability-instruction" class="hidden"></div>
+        <div id="drop-line-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1;"> 
+            <div id="drop-line" style="position: absolute; display: none; pointer-events: none;"></div> <!-- This div uses CSS for its image -->
+        </div>
+    </div>
+    
+    <!-- حذف کانتینرهای ابیلیتی سمت راست -->
+    <!-- <div id="ability-remove-fruit-container" style="position: absolute; top: 120px; right: 20px; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+        <img src="assets/RemoveFruitBtn.png" id="ability-remove-icon" alt="Remove Fruit" width="50" height="50">
+        <span id="ability-remove-count" style="background-color: rgba(0,0,0,0.7); color: white; padding: 2px 5px; border-radius: 5px; font-size: 14px; margin-top: 5px;">3</span>
+    </div>
+    
+    <div id="ability-upgrade-fruit-container" style="position: absolute; top: 200px; right: 20px; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+        <img src="assets/UpgradeBtn.png" id="ability-upgrade-icon" alt="Upgrade Fruit" width="50" height="50">
+        <span id="ability-upgrade-count" style="background-color: rgba(0,0,0,0.7); color: white; padding: 2px 5px; border-radius: 5px; font-size: 14px; margin-top: 5px;">3</span>
+    </div> -->
+
+<div id="watch-ad-popup" class="hidden">
+    <div style="background-image: url('assets/SmallPopup.png'); background-size: contain; background-repeat: no-repeat; background-position: center; padding: 20px; border-radius: 10px; text-align: center; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.5); /* Adjust width and height as needed for SmallPopup.png */ width: 300px; height: 200px;">
+        <img src="assets/CloseBtn.png" id="close-watch-ad-popup" alt="Close" style="position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; cursor: pointer;">
+        <p style="color: white; text-shadow: 1px 1px 2px black;">Watch Ad to get more!</p> <!-- Added text styling for visibility -->
+        <img src="assets/WatchAdBtn.png" id="watch-ad-btn" alt="Watch Ad" style="width: 100px; /* << ADJUST THIS VALUE */ cursor: pointer; margin-top: 15px;">
+    </div>
+</div>
+
+<!-- Ability Tutorial Popup -->
+<div id="ability-tutorial-popup" class="hidden">
+    <div style="background-image: url('assets/SmallPopup.png'); background-size: contain; background-repeat: no-repeat; background-position: center; padding: 20px; border-radius: 10px; text-align: center; position: relative; box-shadow: 0 0 15px rgba(0,0,0,0.5); width: 300px; height: 200px;">
+        <img src="assets/CloseBtn.png" id="close-ability-tutorial" alt="Close" style="position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; cursor: pointer;">
+        <p id="ability-tutorial-text" style="color: white; text-shadow: 1px 1px 2px black; margin-top: 20px;">Click on a fruit to use the ability!</p>
+    </div>
+</div>
+
+    <!-- Remove or comment out old score-board and next-fruit-preview if they are separate -->
+    <!-- <div id="score-board">Score: <span id="score">0</span></div> -->
+    <!-- <div id="next-fruit-preview">Next: <span id="next-fruit-emoji">❓</span></div> -->
+    <div id="abilities-container">
+        <div class="ability-wrapper">
+            <img src="assets/RemoveFruitBtn.png" class="ability-button" id="remove-ability">
+            <span id="ability-remove-count" class="ability-count">3</span>
+        </div>
+        <div class="ability-wrapper">
+            <img src="assets/UpgradeBtn.png" class="ability-button" id="upgrade-ability">
+            <span id="ability-upgrade-count" class="ability-count">3</span>
+        </div>
+    </div>
+    <img src="assets/TutorialBtn.png" id="tutorial-button" class="corner-button" alt="Show Tutorial">
+    <div id="game-overlay" class="hidden"></div>
+
+    <div id="pause-menu" class="hidden">
+        <!-- Updated close button to an image -->
+        <img src="assets/CloseBtn.png" id="close-pause-menu" class="close-button-img" alt="Close Menu">
+        <h2>Paused</h2>
+        <div class="sound-buttons-container">
+            <img src="assets/MusicOnBtn.png" id="music-toggle-button" class="menu-image-button" alt="Toggle Music">
+            <img src="assets/MusicOnBtn.png" id="sound-effects-toggle-button" class="menu-image-button" alt="Toggle Sound Effects">
+        </div>
+        <img src="assets/RetryBtn.png" id="restart-game-button" class="menu-image-button" alt="Restart Game">
+        <img src="assets/RetryBtn.png" id="reset-high-score-button" class="menu-image-button" alt="Reset High Score" style="opacity: 0.7;">
+    </div>
+
+    <!-- Add this right after the game-container div -->
+    <div id="merge-cycle-container">
+        <img src="assets/MergeCycle1.png" id="merge-cycle-image" alt="Merge Cycle">
+    </div>
+
+    <!-- اضافه کردن پاپ‌آپ آموزش -->
+    <div id="tutorial-popup" class="hidden">
+        <img src="assets/CloseBtn.png" id="close-tutorial" class="close-button-img" alt="Close Tutorial">
+        <div class="tutorial-content">
+            <h2 id="tutorial-title">Tutorial</h2>
+            <p id="tutorial-text">Welcome to the tutorial!</p>
+            <div class="tutorial-navigation">
+                <img src="assets/BackBtn.png" id="tutorial-prev" alt="Previous">
+                <span id="tutorial-step">1/4</span>
+                <img src="assets/NextBtn.png" id="tutorial-next" alt="Next">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="main brain.js?v=1.1"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('sw.js')
+            .then(function(reg) {
+              console.log('✅ Service Worker registered!', reg);
+              
+              // Clear old caches on page load
+              if ('caches' in window) {
+                caches.keys().then(function(cacheNames) {
+                  return Promise.all(
+                    cacheNames.map(function(cacheName) {
+                      if (cacheName !== 'brainrat-v1.1') {
+                        console.log('🗑️ Deleting old cache:', cacheName);
+                        return caches.delete(cacheName);
+                      }
+                    })
+                  );
+                });
+              }
+            })
+            .catch(function(err) {
+              console.error('❌ Service Worker registration failed:', err);
+            });
+        }
+      </script>
+      
+</body>
+</html>

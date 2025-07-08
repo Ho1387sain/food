@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainRat Debug - Refresh Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .debug-info {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #007cba;
+        }
+        .refresh-type {
+            font-weight: bold;
+            color: #007cba;
+        }
+        .cache-status {
+            color: #d63638;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+    </style>
+</head>
+<body>
+    <h1>BrainRat Debug - Refresh Test</h1>
+    
+    <div class="debug-info">
+        <h3>Refresh Information</h3>
+        <p><span class="refresh-type">Refresh Type:</span> <span id="refresh-type">Detecting...</span></p>
+        <p><span class="refresh-type">Navigation Type:</span> <span id="nav-type">Detecting...</span></p>
+        <p><span class="refresh-type">Cache Status:</span> <span id="cache-status" class="cache-status">Checking...</span></p>
+        <p><span class="refresh-type">Service Worker:</span> <span id="sw-status">Checking...</span></p>
+    </div>
+    
+    <div class="debug-info">
+        <h3>Actions</h3>
+        <button onclick="clearAllCaches()">Clear All Caches</button>
+        <button onclick="reloadPage()">Reload Page</button>
+        <button onclick="hardRefresh()">Hard Refresh (Ctrl+Shift+R)</button>
+        <button onclick="goToGame()">Go to Game</button>
+        <button onclick="testGravity()">Test Gravity</button>
+    </div>
+    
+    <div class="debug-info">
+        <h3>Instructions</h3>
+        <ol>
+            <li>Click "Go to Game" to open your game</li>
+            <li>Try refreshing with F5 and note any issues</li>
+            <li>Try refreshing with Ctrl+Shift+R and compare</li>
+            <li>Use "Clear All Caches" if you encounter issues</li>
+        </ol>
+    </div>
+
+    <script>
+        // Detect refresh type
+        function detectRefreshType() {
+            const navType = performance.navigation.type;
+            let refreshType = 'Unknown';
+            let navTypeText = 'Unknown';
+            
+            switch(navType) {
+                case 0:
+                    refreshType = 'Normal Navigation';
+                    navTypeText = 'TYPE_NAVIGATE (0)';
+                    break;
+                case 1:
+                    refreshType = 'Page Reload (F5)';
+                    navTypeText = 'TYPE_RELOAD (1)';
+                    break;
+                case 2:
+                    refreshType = 'Back/Forward';
+                    navTypeText = 'TYPE_BACK_FORWARD (2)';
+                    break;
+                default:
+                    refreshType = 'Other';
+                    navTypeText = navType;
+            }
+            
+            document.getElementById('refresh-type').textContent = refreshType;
+            document.getElementById('nav-type').textContent = navTypeText;
+        }
+        
+        // Check cache status
+        async function checkCacheStatus() {
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    const cacheInfo = cacheNames.length > 0 ? 
+                        `Found ${cacheNames.length} cache(s): ${cacheNames.join(', ')}` : 
+                        'No caches found';
+                    document.getElementById('cache-status').textContent = cacheInfo;
+                } catch (error) {
+                    document.getElementById('cache-status').textContent = 'Error checking caches: ' + error.message;
+                }
+            } else {
+                document.getElementById('cache-status').textContent = 'Caches API not supported';
+            }
+        }
+        
+        // Check service worker status
+        async function checkServiceWorkerStatus() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    const registration = await navigator.serviceWorker.getRegistration();
+                    if (registration) {
+                        document.getElementById('sw-status').textContent = 
+                            `Active: ${registration.active ? 'Yes' : 'No'}, Scope: ${registration.scope}`;
+                    } else {
+                        document.getElementById('sw-status').textContent = 'No service worker registered';
+                    }
+                } catch (error) {
+                    document.getElementById('sw-status').textContent = 'Error checking SW: ' + error.message;
+                }
+            } else {
+                document.getElementById('sw-status').textContent = 'Service Worker not supported';
+            }
+        }
+        
+        // Clear all caches
+        async function clearAllCaches() {
+            if ('caches' in window) {
+                try {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(cacheNames.map(name => caches.delete(name)));
+                    alert('All caches cleared!');
+                    checkCacheStatus();
+                } catch (error) {
+                    alert('Error clearing caches: ' + error.message);
+                }
+            } else {
+                alert('Caches API not supported');
+            }
+        }
+        
+        // Reload page
+        function reloadPage() {
+            location.reload();
+        }
+        
+        // Hard refresh
+        function hardRefresh() {
+            location.reload(true);
+        }
+        
+        // Go to game
+        function goToGame() {
+            window.open('index.html', '_blank');
+        }
+        
+        // Test gravity in the game
+        function testGravity() {
+            const gameWindow = window.open('index.html', '_blank');
+            if (gameWindow) {
+                setTimeout(() => {
+                    try {
+                        // Try to access the game's gravity
+                        if (gameWindow.ensureCorrectGravity) {
+                            gameWindow.ensureCorrectGravity();
+                            alert('Gravity test completed! Check the game window.');
+                        } else {
+                            alert('Gravity function not accessible. Check console for details.');
+                        }
+                    } catch (e) {
+                        alert('Could not test gravity: ' + e.message);
+                    }
+                }, 2000);
+            }
+        }
+        
+        // Initialize debug info
+        window.addEventListener('load', function() {
+            detectRefreshType();
+            checkCacheStatus();
+            checkServiceWorkerStatus();
+        });
+    </script>
+</body>
+</html> 
